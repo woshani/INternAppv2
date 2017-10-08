@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Internship App v2</string>
+    <string-array name="menu">
+        <item>Apply</item>
+    </string-array>
+    <string-array name="applicationMenu">
+        <item>Accept</item>
+        <item>Reject</item>
+    </string-array>
+    <string-array name="compVacanOption">
+        <item>Edit</item>
+        <item>Delete</item>
+    </string-array>
+    <string-array name="manageStud">
+        <item>Register</item>
+    </string-array>
+</resources>
