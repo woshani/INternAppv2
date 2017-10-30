@@ -31,7 +31,8 @@
         <activity android:name=".registerCompany" />
         <activity android:name=".viewApplicationCom" />
         <activity android:name=".viewApplicationStudent" />
-        <activity android:name=".manageStudent"></activity>
+        <activity android:name=".manageStudent" />
+        <activity android:name=".studentStatus"></activity>
     </application>
 
 </manifest>

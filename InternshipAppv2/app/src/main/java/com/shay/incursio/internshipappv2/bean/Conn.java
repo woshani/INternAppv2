@@ -5,7 +5,7 @@ package com.shay.incursio.internshipappv2.bean;
  */
 
 public class Conn {
-    public static String host = "http://192.168.137.1/internshipappwebservices/";
+    public static String host = "http://192.168.0.177/internshipappwebservices/";
 
     public static String getHost() {
         return host;

@@ -18,6 +18,15 @@ public class StudentNS {
     private  String status;
     private  String batchId;
     private  String course;
+    private boolean box;
+
+    public boolean isBox() {
+        return box;
+    }
+
+    public void setBox(boolean box) {
+        this.box = box;
+    }
 
     public String getUserId() {
         return userId;

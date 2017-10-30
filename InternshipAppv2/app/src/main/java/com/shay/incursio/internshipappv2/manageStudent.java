@@ -3,6 +3,7 @@ package com.shay.incursio.internshipappv2;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -11,6 +12,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
@@ -25,6 +27,7 @@ import com.kosalgeek.android.json.JsonConverter;
 import com.kosalgeek.genasync12.AsyncResponse;
 import com.kosalgeek.genasync12.PostResponseAsyncTask;
 import com.shay.incursio.internshipappv2.Utils.CustomAdapterSpinner;
+import com.shay.incursio.internshipappv2.Utils.ListAdapter;
 import com.shay.incursio.internshipappv2.bean.Batch;
 import com.shay.incursio.internshipappv2.bean.Conn;
 import com.shay.incursio.internshipappv2.bean.Student;
@@ -40,7 +43,7 @@ import java.util.List;
 import static android.R.id.list;
 
 public class manageStudent extends AppCompatActivity implements AdapterView.OnItemSelectedListener{
-    Button filter;
+    Button filter,register;
     String batch[];
     String idBatch[];
     String ids = "-";
@@ -51,6 +54,10 @@ public class manageStudent extends AppCompatActivity implements AdapterView.OnIt
     JSONArray jsonArrayStudent;
     ArrayList<Batch> batchList;
     ListView lvMG;
+    ArrayList<String> selectedStudID = new ArrayList<String>();
+    CheckBox cekbox;
+    ListAdapter studAdapter;
+    ArrayList<StudentNS> lS = new ArrayList<StudentNS>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,11 +66,12 @@ public class manageStudent extends AppCompatActivity implements AdapterView.OnIt
         filter = (Button) findViewById(R.id.btnfilterStud);
         batchSelect = (Spinner)findViewById(R.id.spinnerBatch);
         lvMG = (ListView)findViewById(R.id.lvMg);
+        register = (Button)findViewById(R.id.btnReigster);
+
 
         PostResponseAsyncTask getBatch = new PostResponseAsyncTask(manageStudent.this, new AsyncResponse() {
             @Override
             public void processFinish(String s) {
-
                 if(s.equalsIgnoreCase("no data")){
                     Toast.makeText(manageStudent.this,"No Data..",Toast.LENGTH_LONG).show();
                 }else{
@@ -96,6 +104,8 @@ public class manageStudent extends AppCompatActivity implements AdapterView.OnIt
                         CustomAdapterSpinner customAdapter=new CustomAdapterSpinner(getApplicationContext(),batch,idBatch);
                         batchSelect.setAdapter(customAdapter);
 
+
+                        // function when buton filter is clicked
                         filter.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
@@ -104,21 +114,22 @@ public class manageStudent extends AppCompatActivity implements AdapterView.OnIt
                                 if(ids.equalsIgnoreCase("-") || ids.equalsIgnoreCase("")){
                                     Toast.makeText(getApplicationContext(), "Please choose batch first", Toast.LENGTH_SHORT).show();
                                 }else{
-                                    Toast.makeText(getApplicationContext(), ids, Toast.LENGTH_SHORT).show();
                                     HashMap idss = new HashMap();
                                     idss.put("id",ids);
                                     PostResponseAsyncTask getByBatch = new PostResponseAsyncTask(manageStudent.this,idss, new AsyncResponse() {
 
                                         @Override
                                         public void processFinish(String s) {
-                                            Log.d("data return",s);
                                             if(s.equalsIgnoreCase("no data")){
                                                 Toast.makeText(manageStudent.this,"No Data..",Toast.LENGTH_LONG).show();
+                                                lS.clear();
+                                                studAdapter = new ListAdapter(manageStudent.this, lS);
+                                                lvMG.setAdapter(studAdapter);
                                             }else{
-                                                ArrayList<StudentNS> lS = new ArrayList<StudentNS>();
+
                                                 BindDictionary<StudentNS> dict = new BindDictionary<>();
                                                 try {
-
+                                                    lS.clear();
                                                     jsonArrayStudent = new JSONArray(s);
                                                     for(int i=0; i<jsonArrayStudent.length(); i++) {
                                                         StudentNS stud = new StudentNS();
@@ -134,26 +145,8 @@ public class manageStudent extends AppCompatActivity implements AdapterView.OnIt
                                                         lS.add(stud);
                                                     }
 
-                                                    dict.addStringField(R.id.tvStudName, new StringExtractor<StudentNS>() {
-                                                        @Override
-                                                        public String getStringValue(StudentNS item, int position) {
-                                                            String nameView = "Name : "+ item.getName();
-                                                            return nameView;
-                                                        }
-                                                    });
-
-                                                    dict.addStringField(R.id.tvStudID, new StringExtractor<StudentNS>() {
-                                                        @Override
-                                                        public String getStringValue(StudentNS item, int position) {
-                                                            String idStud = "Matric : "+item.getStudentId();
-                                                            return  idStud;
-                                                        }
-                                                    });
-                                                    FunDapter<StudentNS> adapter = new FunDapter<>(manageStudent.this,lS,R.layout.student_by_batch,dict);
-                                                    lvMG.setAdapter(adapter);
-                                                    registerForContextMenu(lvMG);
-
-
+                                                    studAdapter = new ListAdapter(manageStudent.this, lS);
+                                                    lvMG.setAdapter(studAdapter);
                                                 } catch (JSONException e) {
                                                     e.printStackTrace();
                                                 }
@@ -163,6 +156,41 @@ public class manageStudent extends AppCompatActivity implements AdapterView.OnIt
                                     getByBatch.execute(host+"getStudentBatch.php");
                                 }
 
+
+                            }
+                        });
+//                      button when register is clicked
+                        register.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                ArrayList<String> studIDs = studAdapter.getSelectedString();
+                                if(studIDs.size() < 0){
+
+                                }else{
+                                    HashMap PostData = new HashMap();
+                                    for(int i =0;i < studIDs.size();i++){
+                                        Log.d("matric "+i,studIDs.get(i));
+                                    }
+
+                                    String joined = TextUtils.join("|", studIDs);
+                                    PostData.put("id_stud", joined.trim());
+                                    PostResponseAsyncTask getDetail = new PostResponseAsyncTask(manageStudent.this, PostData, new AsyncResponse() {
+                                    @Override
+                                            public void processFinish(String s) {
+                                                Log.d("ReturnData ", s);
+                                                if(s.equalsIgnoreCase("success")){
+                                                    Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
+                                                    Intent i = new Intent(manageStudent.this,CommitteMenu.class);
+                                                    startActivity(i);
+                                                    finish();
+
+                                                }else{
+                                                    Toast.makeText(getApplicationContext(), "Failed,Try Again..", Toast.LENGTH_SHORT).show();
+                                                }
+                                            }
+                                        });
+                                        getDetail.execute(host+"registerStudent.php");
+                                }
                             }
                         });
 
@@ -176,6 +204,8 @@ public class manageStudent extends AppCompatActivity implements AdapterView.OnIt
         getBatch.execute(host+"getBatch.php");
 
     }
+
+
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v,
@@ -191,31 +221,6 @@ public class manageStudent extends AppCompatActivity implements AdapterView.OnIt
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
-        int menuItemIndex = item.getItemId();
-        String[] menuItems = getResources().getStringArray(R.array.manageStud);
-        String menuItemName = menuItems[menuItemIndex];
-        String selectedWord = ((TextView)info.targetView.findViewById(R.id.tvStudID)).getText().toString();
-        Log.d("Item id", selectedWord);
-        selectedWord = selectedWord.replace("Matric :","");
-        Log.d("New word ", selectedWord.trim());
-        HashMap PostData = new HashMap();
-        PostData.put("id_stud", selectedWord.trim());
-        if(menuItemName.equalsIgnoreCase("Register")){
-            PostResponseAsyncTask getDetail = new PostResponseAsyncTask(manageStudent.this, PostData, new AsyncResponse() {
-                @Override
-                public void processFinish(String s) {
-                    Log.d("ReturnData ", s);
-                    if(s.equalsIgnoreCase("success")){
-                        Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
-                    }else{
-                        Toast.makeText(getApplicationContext(), "Failed,Try Again..", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
-            getDetail.execute(host+"registerStudent.php");
-        }
-
         return true;
     }
     //Performing action onItemSelected and onNothing selected
