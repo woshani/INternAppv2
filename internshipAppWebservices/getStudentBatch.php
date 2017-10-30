@@ -3,7 +3,7 @@ include_once('connection.php');
 
 $idBatch = $_POST['id'];
 
-$sql = "SELECT id_student,ic_no,name,email,no_tel,address,course,status,batch_id FROM student WHERE batch_id = '".$idBatch."';";
+$sql = "SELECT id_student,ic_no,name,email,no_tel,address,course,status,batch_id FROM student WHERE batch_id = '".$idBatch."' and status = 0;";
 
 $resultSelect = mysqli_query($conn,$sql);
 if($resultSelect->num_rows > 0){
