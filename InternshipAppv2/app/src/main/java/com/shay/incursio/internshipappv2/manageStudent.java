@@ -28,6 +28,7 @@ import com.kosalgeek.genasync12.AsyncResponse;
 import com.kosalgeek.genasync12.PostResponseAsyncTask;
 import com.shay.incursio.internshipappv2.Utils.CustomAdapterSpinner;
 import com.shay.incursio.internshipappv2.Utils.ListAdapter;
+import com.shay.incursio.internshipappv2.bean.ApplicationStatusStudent;
 import com.shay.incursio.internshipappv2.bean.Batch;
 import com.shay.incursio.internshipappv2.bean.Conn;
 import com.shay.incursio.internshipappv2.bean.Student;
@@ -36,9 +37,15 @@ import com.shay.incursio.internshipappv2.bean.StudentNS;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Vector;
 
 import static android.R.id.list;
 
@@ -48,17 +55,21 @@ public class manageStudent extends AppCompatActivity implements AdapterView.OnIt
     String idBatch[];
     String ids = "-";
     Spinner batchSelect;
-    SpinnerAdapter sp;
     String host = Conn.getHost();
     JSONArray jsonArray;
-    JSONArray jsonArrayStudent;
-    ArrayList<Batch> batchList;
+    JSONArray jsonArrayStudent,jsonArrayAppStat;
     ListView lvMG;
-    ArrayList<String> selectedStudID = new ArrayList<String>();
-    CheckBox cekbox;
     ListAdapter studAdapter;
     ArrayList<StudentNS> lS = new ArrayList<StudentNS>();
+    ArrayList<ApplicationStatusStudent> vappStats;
+    StudentNS stud;
+    InputStream is=null;
+    String result=null;
+    String line=null;
+    String statusApplication;
+    HttpURLConnection urlConnection = null;
 
+    String text;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -127,12 +138,12 @@ public class manageStudent extends AppCompatActivity implements AdapterView.OnIt
                                                 lvMG.setAdapter(studAdapter);
                                             }else{
 
-                                                BindDictionary<StudentNS> dict = new BindDictionary<>();
                                                 try {
                                                     lS.clear();
                                                     jsonArrayStudent = new JSONArray(s);
                                                     for(int i=0; i<jsonArrayStudent.length(); i++) {
-                                                        StudentNS stud = new StudentNS();
+                                                        stud = new StudentNS();
+                                                        vappStats = new ArrayList<>();
                                                         stud.setStudentId(jsonArrayStudent.getJSONObject(i).getString("id_student"));
                                                         stud.setName(jsonArrayStudent.getJSONObject(i).getString("name"));
                                                         stud.setEmail(jsonArrayStudent.getJSONObject(i).getString("email"));
@@ -144,7 +155,6 @@ public class manageStudent extends AppCompatActivity implements AdapterView.OnIt
                                                         stud.setIcNo(jsonArrayStudent.getJSONObject(i).getString("ic_no"));
                                                         lS.add(stud);
                                                     }
-
                                                     studAdapter = new ListAdapter(manageStudent.this, lS);
                                                     lvMG.setAdapter(studAdapter);
                                                 } catch (JSONException e) {

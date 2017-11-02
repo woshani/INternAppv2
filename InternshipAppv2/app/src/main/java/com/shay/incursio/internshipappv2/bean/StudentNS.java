@@ -1,5 +1,8 @@
 package com.shay.incursio.internshipappv2.bean;
 
+import java.util.ArrayList;
+import java.util.Vector;
+
 /**
  * Created by User on 08/10/2017.
  */
@@ -19,6 +22,7 @@ public class StudentNS {
     private  String batchId;
     private  String course;
     private boolean box;
+    private ArrayList<ApplicationStatusStudent> appStats;
 
     public boolean isBox() {
         return box;
@@ -130,5 +134,13 @@ public class StudentNS {
 
     public void setCourse(String course) {
         this.course = course;
+    }
+
+    public ArrayList<ApplicationStatusStudent> getAppStats() {
+        return appStats;
+    }
+
+    public void setAppStats(ArrayList<ApplicationStatusStudent> appStats) {
+        this.appStats = appStats;
     }
 }

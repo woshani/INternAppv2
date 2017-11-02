@@ -131,14 +131,14 @@ public class viewVacancyStud  extends AppCompatActivity{
                 public void processFinish(String s) {
                     Log.d("result",s);
                     if(s.equalsIgnoreCase("inserted")){
-                        Toast.makeText(viewVacancyStud.this,"Application successfully sent.",Toast.LENGTH_LONG).show();
+                        Toast.makeText(viewVacancyStud.this,"Application SUCCESSFULLY sent.",Toast.LENGTH_LONG).show();
                         Intent i = new Intent(viewVacancyStud.this,viewVacancyStud.class);
                         startActivity(i);
                         finish();
                     }else if(s.equalsIgnoreCase("fail")){
-                        Toast.makeText(viewVacancyStud.this,"Application failed to sent.",Toast.LENGTH_LONG).show();
+                        Toast.makeText(viewVacancyStud.this,"Application FAILED to sent.",Toast.LENGTH_LONG).show();
                     }else if(s.equalsIgnoreCase("already")){
-                        Toast.makeText(viewVacancyStud.this,"Application already sent.",Toast.LENGTH_LONG).show();
+                        Toast.makeText(viewVacancyStud.this,"Application ALREADY sent.",Toast.LENGTH_LONG).show();
                     }
                 }
             });

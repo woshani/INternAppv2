@@ -11,10 +11,26 @@ import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import com.kosalgeek.genasync12.AsyncResponse;
+import com.kosalgeek.genasync12.PostResponseAsyncTask;
 import com.shay.incursio.internshipappv2.R;
+import com.shay.incursio.internshipappv2.bean.ApplicationStatusStudent;
+import com.shay.incursio.internshipappv2.bean.Conn;
 import com.shay.incursio.internshipappv2.bean.StudentNS;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
+import com.kosalgeek.genasync12.AsyncResponse;
+import com.kosalgeek.genasync12.PostResponseAsyncTask;
+import com.shay.incursio.internshipappv2.manageStudent;
+
 
 /**
  * Created by wosha on 31/10/2017.
@@ -27,6 +43,19 @@ public class ListAdapter extends BaseAdapter {
     ArrayList<StudentNS> objects;
     ArrayList<String> selectedStrings = new ArrayList<String>();
     CheckBox cbBuy;
+    String StatusStud = "";
+    String statusApplication="";
+    ArrayList<ApplicationStatusStudent> vectAppStat;
+    JSONArray jsonArrayAppStat;
+    String host = Conn.getHost();
+    StudentNS p;
+    InputStream is=null;
+    String result=null;
+    String line=null;
+    HttpURLConnection urlConnection = null;
+
+    String text;
+
 
     public ListAdapter(Context context, ArrayList<StudentNS> student) {
         ctx = context;
@@ -51,22 +80,6 @@ public class ListAdapter extends BaseAdapter {
         return position;
     }
 
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        View view = convertView;
-        if (view == null) {
-            view = lInflater.inflate(R.layout.student_by_batch, parent, false);
-        }
-
-        StudentNS p = getStud(position);
-
-        ((TextView) view.findViewById(R.id.tvStudName)).setText(p.getName());
-        cbBuy = (CheckBox)view.findViewById(R.id.cbxStud);
-        cbBuy.setOnCheckedChangeListener(myCheckChangList);
-        cbBuy.setText(p.getStudentId());
-        cbBuy.setTag(position);
-        return view;
-    }
     StudentNS getStud(int position) {
         return ((StudentNS) getItem(position));
     }
@@ -85,4 +98,57 @@ public class ListAdapter extends BaseAdapter {
 
         }
     };
+
+    public String status(String id){
+        HashMap idStud = new HashMap();
+        idStud.put("idStudent",id);
+        PostResponseAsyncTask getStat = new PostResponseAsyncTask(ctx, idStud, new AsyncResponse() {
+            @Override
+            public void processFinish(String s) {
+                try{
+                    if(!s.equalsIgnoreCase("no data")){
+                        jsonArrayAppStat = new JSONArray(s);
+                        for(int i=0; i<jsonArrayAppStat.length(); i++) {
+                            result = jsonArrayAppStat.getJSONObject(i).getString("comp_name") + ": " + jsonArrayAppStat.getJSONObject(i).getString("application_status")+"\n";
+                            Log.d("test id stud",p.getStudentId());
+                            Log.d("test",String.valueOf(jsonArrayAppStat.length()));
+                            Log.d("test name",jsonArrayAppStat.getJSONObject(i).getString("comp_name"));
+                        }
+                    }else{
+                        result = "No Application";
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        getStat.execute(host+"getStatusApplication.php");
+        return result;
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        View view = convertView;
+        if (view == null) {
+            view = lInflater.inflate(R.layout.student_by_batch, parent, false);
+        }
+        p = getStud(position);
+
+        if(p.getStatus().equalsIgnoreCase("1")){
+            StatusStud = "Registered";
+        }else if(p.getStatus().equalsIgnoreCase("0")){
+            StatusStud = "Not Registered";
+        }
+
+        ((TextView) view.findViewById(R.id.tvStudStatusApp)).setText(statusApplication);
+        ((TextView) view.findViewById(R.id.tvStudName)).setText(p.getName());
+        ((TextView) view.findViewById(R.id.tvStudStatus)).setText(StatusStud);
+
+        cbBuy = (CheckBox)view.findViewById(R.id.cbxStud);
+        cbBuy.setOnCheckedChangeListener(myCheckChangList);
+        cbBuy.setText(p.getStudentId());
+        cbBuy.setTag(position);
+        return view;
+    }
+
 }
